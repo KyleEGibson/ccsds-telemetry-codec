@@ -24,7 +24,8 @@ if(TLM_SANITIZE AND NOT MSVC)
 endif()
 
 add_library(tlm
-  src/crc16.cpp)
+  src/crc16.cpp
+  src/space_packet.cpp)
 target_include_directories(tlm PUBLIC include)
 target_link_libraries(tlm PRIVATE tlm_warnings)
 
@@ -40,7 +41,8 @@ if(TLM_BUILD_TESTS)
 
   enable_testing()
   add_executable(tlm_tests
-    tests/test_crc16.cpp)
+    tests/test_crc16.cpp
+    tests/test_space_packet.cpp)
   target_link_libraries(tlm_tests PRIVATE tlm tlm_warnings GTest::gtest_main)
   include(GoogleTest)
   gtest_discover_tests(tlm_tests)
