@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux (GCC, Clang+ASan/UBSan, harness, fuzzing)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build the dev container (same as local)
+        run: docker build -t tlm-dev -f docker/Dockerfile .
+      - name: All checks, 120 s of fuzzing
+        run: docker run --rm -e FUZZ_SECONDS=120 -v "$PWD:/src" -w /src tlm-dev ./scripts/ci.sh
+
+  windows:
+    name: Windows (MSVC)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: cmake -S . -B build/msvc
+      - run: cmake --build build/msvc --config Release
+      - run: ctest --test-dir build/msvc -C Release --output-on-failure
+      - run: pip install pytest
+      - name: UDP integration harness against the MSVC decoder
+        env:
+          TLM_DECODE: build/msvc/Release/tlm_decode.exe
+        run: python -m pytest -q harness
