@@ -8,6 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(TLM_BUILD_TESTS "Build the GoogleTest suite" ON)
 option(TLM_SANITIZE "Build with AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+option(TLM_BUILD_FUZZERS "Build libFuzzer targets (Clang only)" OFF)
 
 # Strict warnings, treated as errors, on every compiler.
 add_library(tlm_warnings INTERFACE)
@@ -16,6 +17,12 @@ if(MSVC)
 else()
   target_compile_options(tlm_warnings INTERFACE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion
                                                 -Wshadow -Wold-style-cast -Werror)
+endif()
+
+if(TLM_BUILD_FUZZERS)
+  # instrument the library too, so libFuzzer gets coverage feedback from it
+  add_compile_options(-fsanitize=fuzzer-no-link,address,undefined -fno-omit-frame-pointer)
+  add_link_options(-fsanitize=address,undefined)
 endif()
 
 if(TLM_SANITIZE AND NOT MSVC)
@@ -59,4 +66,13 @@ if(TLM_BUILD_TESTS)
   target_link_libraries(tlm_tests PRIVATE tlm tlm_warnings GTest::gtest_main)
   include(GoogleTest)
   gtest_discover_tests(tlm_tests)
+endif()
+
+if(TLM_BUILD_FUZZERS)
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(FATAL_ERROR "TLM_BUILD_FUZZERS needs Clang (libFuzzer)")
+  endif()
+  add_executable(decode_fuzzer fuzz/decode_fuzzer.cpp)
+  target_link_libraries(decode_fuzzer PRIVATE tlm)
+  target_link_options(decode_fuzzer PRIVATE -fsanitize=fuzzer)
 endif()
