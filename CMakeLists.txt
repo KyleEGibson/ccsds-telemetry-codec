@@ -48,7 +48,8 @@ if(TLM_BUILD_TESTS)
     tests/test_space_packet.cpp
     tests/test_payloads.cpp
     tests/test_sequence.cpp
-    tests/test_stream.cpp)
+    tests/test_stream.cpp
+    tests/test_robustness.cpp)
   target_link_libraries(tlm_tests PRIVATE tlm tlm_warnings GTest::gtest_main)
   include(GoogleTest)
   gtest_discover_tests(tlm_tests)
