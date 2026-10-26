@@ -26,7 +26,8 @@ endif()
 add_library(tlm
   src/crc16.cpp
   src/space_packet.cpp
-  src/payloads.cpp)
+  src/payloads.cpp
+  src/sequence.cpp)
 target_include_directories(tlm PUBLIC include)
 target_link_libraries(tlm PRIVATE tlm_warnings)
 
@@ -44,7 +45,8 @@ if(TLM_BUILD_TESTS)
   add_executable(tlm_tests
     tests/test_crc16.cpp
     tests/test_space_packet.cpp
-    tests/test_payloads.cpp)
+    tests/test_payloads.cpp
+    tests/test_sequence.cpp)
   target_link_libraries(tlm_tests PRIVATE tlm tlm_warnings GTest::gtest_main)
   include(GoogleTest)
   gtest_discover_tests(tlm_tests)
