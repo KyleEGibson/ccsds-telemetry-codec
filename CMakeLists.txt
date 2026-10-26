@@ -32,6 +32,12 @@ add_library(tlm
 target_include_directories(tlm PUBLIC include)
 target_link_libraries(tlm PRIVATE tlm_warnings)
 
+add_executable(tlm_decode tools/tlm_decode.cpp)
+target_link_libraries(tlm_decode PRIVATE tlm tlm_warnings)
+if(WIN32)
+  target_link_libraries(tlm_decode PRIVATE ws2_32)
+endif()
+
 if(TLM_BUILD_TESTS)
   include(FetchContent)
   FetchContent_Declare(googletest
